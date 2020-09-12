@@ -1,0 +1,1 @@
+Capturadora de datos
