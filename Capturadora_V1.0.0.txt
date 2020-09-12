@@ -1,0 +1,91 @@
+using System;
+using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Xml.Linq;
+
+namespace CapturaDatos
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            bool y = false;
+            bool z = false;
+            string ID, nam, ag, path;
+            string x = "a";
+            path = @args[0];
+            do
+            {
+                Console.WriteLine("Capturadora de datos V1.0.0");
+                Console.WriteLine("Introduzca los datos requeridos");
+                Console.Write("Cédula: ");
+                ID = Console.ReadLine();
+                Console.Write("Nombre: ");
+                nam = Console.ReadLine();
+                Console.Write("Edad: ");
+                ag = Console.ReadLine();
+                while (z == false)
+                {
+                    Console.WriteLine("¿Está seguro que desea guardar estos datos?");
+                    Console.Write("Guardar(G), Descartar(D), Salir(S): ");
+                    x = Console.ReadLine().ToUpper();
+                    if (x == "G" || x == "D" || x == "S")
+                    {
+                        z = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Introduzca un valor válido.");
+                        z = false;
+                    }
+                }
+                switch(x)
+                {
+                    case "G":
+                        add(ID, nam, ag, path);
+                        Console.WriteLine("Guardado satisfactoriamente.");
+                        y = true;
+                        break;
+                    case "D":
+                        y = false;
+                        z = false;
+                        Console.WriteLine();
+                        break;
+                    case "S":
+                        Environment.Exit(0);
+                        break;
+
+                }
+
+            }
+            while (y == false);
+        }
+
+        public static void add(string vID, string vNam, string vAg, string filepath)
+        {
+            try
+            {
+                if (!Directory.Exists(@filepath))
+                {
+                    using (StreamWriter writer = new StreamWriter(new FileStream(@filepath, FileMode.Append, FileAccess.Write)))
+                    {
+                        writer.WriteLine(vID + "," + vNam + "," + vAg);
+                    }
+                }
+                else
+                {
+                    using (StreamWriter writer = new StreamWriter(new FileStream(@filepath, FileMode.Create, FileAccess.Write)))
+                    {
+                        writer.WriteLine(vID + "," + vNam + "," + vAg);
+                    }
+                }
+
+            }
+            catch(Exception e)
+            {
+                Console.Error.WriteLine("Error: "+e);
+                Environment.Exit(0);
+            }
+        }
+    }
+}
