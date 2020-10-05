@@ -1,0 +1,237 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+
+namespace CapturaDatos
+{
+    class Person
+    {
+        private int id { get; }
+        private string name { get; }
+        private int data { get; }
+        private decimal earn { get; }
+        private string pass { get; }
+        public override string ToString()
+            => $"ID: {id}; Name: {name}; Age: {DeAg(data)}; Earnings: {earn}; Password: {WritePass(pass)}; Gender: {DeGen(data)}; Marital status: {DeEC(data)}; Academic status: {DeEA(data)}";
+
+        public Person(int ID, string Name, int Data, decimal Earn, string Pass)
+        {
+            id = ID;
+            name = Name;
+            data = Data;
+            earn = Earn;
+            pass = Pass;
+        }
+
+        private static Person FromLine(string line)
+        {
+            string[] term = line.Split(',');
+            Person x = new Person(int.Parse(term[0]), term[1], int.Parse(term[2]), decimal.Parse(term[3]), term[4]);
+            return x;
+        }
+
+        public static Person GetPerson(string line)
+        {
+            return Person.FromLine(line);
+        }
+
+        public static bool validar(string para, string filepath)
+        {
+            string[] data = System.IO.File.ReadAllLines(@filepath);
+            foreach (string line in data)
+            {
+                string[] term = line.Split(',');
+                if (term[0] == para)
+                {
+                    return false;
+                }
+            }
+            return true;
+
+
+        }
+        public static void AddCSV(string vID, string vNam, string vAg, string vAh, string vpass, string @filepath)
+        {
+            Person x = new Person(int.Parse(vID), vNam, int.Parse(vAg), decimal.Parse(vAh), vpass);
+            try
+            {
+                if (File.Exists(@filepath))
+                {
+                    if (validar(Convert.ToString(x.id), filepath))
+                    {
+                        using (StreamWriter writer = new StreamWriter(new FileStream(@filepath, FileMode.Append, FileAccess.Write)))
+                        {
+                            writer.WriteLine(Convert.ToString(x.id) + ',' + x.name + ',' + x.data + ',' + x.earn + ',' + x.pass);
+
+
+                        }
+                        Console.WriteLine("Guardado satisfactoriamente.");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Cédula ya registrada");
+                        return;
+                    }
+                }
+                else 
+                {
+                    using (StreamWriter writer = new StreamWriter(new FileStream(@filepath, FileMode.Create, FileAccess.Write)))
+                    {
+                        writer.WriteLine(Convert.ToString(x.id) + ',' + x.name + ',' + x.data + ',' + x.earn + ',' + x.pass);
+                    }
+                    Console.WriteLine("Guardado satisfactoriamente.");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Error: " + e);
+                Environment.Exit(0);
+            }
+        }
+        public static void ListCSV(string path)
+        {
+            if (File.Exists(@path))
+            {
+                string[] data = load(path);
+                foreach (string line in data)
+                {
+                    Person x = Person.FromLine(line);
+                    Console.WriteLine(x.ToString());
+                }
+            }
+            else
+            {
+                Console.Error.WriteLine("Archivo no existe");
+            }
+            
+          
+        }
+
+        public static void SearchCSV(string path, string param)
+        {
+            if (File.Exists(@path))
+            {
+                string[] data = load(path);
+                foreach (string line in data)
+                {
+                    Person x = Person.FromLine(line);
+                    if (Convert.ToString(x.id) == param)
+                    {
+                        Console.WriteLine(x.ToString());
+
+                    }
+                }
+
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Error.WriteLine("Archivo no existe");
+            }
+
+           
+        }
+        public static void EditCSV(string path)
+        { 
+        }
+
+        public static void DeleteCSV(string path, string param, string temp)
+        {
+            if (File.Exists(@path))
+            {
+                if (validar(param, path) == false)
+                {
+                    string[] data = load(path);
+                    foreach (string line in data)
+                    {
+                        Person x = Person.FromLine(line);
+                        if(!(x.id==int.Parse(param)))
+                        {
+                            Person.AddCSV(Convert.ToString(x.id), x.name, Convert.ToString(x.data), Convert.ToString(x.earn), x.pass, temp);
+                        }
+                    }
+                    File.Delete(@path);
+                    System.IO.File.Move(temp, path);
+                    Console.WriteLine("Eliminado satisfactoriamente");
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine("Cédula no existente");
+                }
+
+            }
+            else
+            {
+                Console.Error.WriteLine("Archivo no existe");
+            }
+        }
+
+        public static string[] load(string filepath)
+        {
+            string[] lines = System.IO.File.ReadAllLines(@filepath);
+            return lines;
+        }
+
+        public static char DeGen(int ag)
+        {
+            if ((ag & 0b_010000000000) == 0b_010000000000)
+            {
+                return 'M';
+            }
+            else
+            {
+                return 'F';
+            }
+        }
+        public static char DeEC(int ag)
+        {
+            if ((ag & 0b_001000000000) == 0b_001000000000)
+            {
+                return 'C';
+            }
+            else
+            {
+                return 'S';
+            }
+        }
+        public static char DeEA(int ag)
+        {
+
+            if ((ag & 0b_000110000000) == 0b_000110000000)
+            {
+                return 'P';
+            }
+            else if ((ag & 0b_000100000000) == 0b_000100000000)
+            {
+                return 'G';
+            }
+            else if ((ag & 0b_000010000000) == 0b_000010000000)
+            {
+                return 'M';
+            }
+            else
+            {
+                return 'I';
+            }
+
+        }
+        public static int DeAg(int ag)
+        {
+            return ag & 0b_1111111;
+        }
+        public static string WritePass(string i)
+        {
+            string y = "";
+            foreach (char x in i)
+            {
+                y += '*';
+            }
+            return y;
+        }
+
+    }
+}
