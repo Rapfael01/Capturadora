@@ -1,0 +1,629 @@
+using System;
+using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Xml.Linq;
+using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Transactions;
+using System.Linq.Expressions;
+
+namespace CapturaDatos
+{
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            string path = @"C:\Users\Rapfael\Desktop\CSV test\txt.csv";
+            bool bo = false;
+            do
+            {
+                Person[] toSort = Person.load(@path);
+                ArraySet sorted = new ArraySet();
+                foreach(Person p in toSort)
+                {
+                    sorted.Add(p);
+                }
+                
+                
+                Console.Clear();
+                bool bb = false;
+                string a = "a";
+                
+                Console.WriteLine("Capturadora de datos V6.5.0");
+                Console.WriteLine("OJO: Comparison implementado en la busqueda.");
+                Console.WriteLine("Escoja la opción deseada");
+                Console.WriteLine("1. Capturar");
+                Console.WriteLine("2. Enlistar");
+                Console.WriteLine("3. Buscar");
+                Console.WriteLine("4. Editar");
+                Console.WriteLine("5. Eliminar");
+                Console.WriteLine("6. Salir");
+                while (bb == false)
+                {
+                    a = Console.ReadLine().ToUpper();
+                    if (a == "1" || a == "2" || a == "3" || a=="4" || a=="5" || a=="6")
+                    {
+                        bb = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Introduzca un valor válido.");
+                        Console.WriteLine();
+                        bb = false;
+                    }
+                }
+                switch(a)
+                {
+                    case "1":
+                        bool y = false;
+                        bool z = false;
+                        bool v = false;
+                        string nam, pass, ah;
+                        int ID,ag;
+                        ag = -1;
+                        string x = "a";
+                        bool w = false;
+                        bool EC;
+                        bool gen;
+                        char EA;
+
+
+                        do
+                        {
+                            Console.WriteLine("Introduzca los datos requeridos");
+                            Console.Write("Cédula: ");
+                            ID = ValidateInt();
+                            Console.Write("Nombre: ");
+                            nam = Console.ReadLine();
+                            Console.WriteLine("Edad: ");
+                            do
+                            {
+                                Console.WriteLine("*Introduzca un valor entre 0 y 127");
+                                ag = ValidateInt();
+                            }
+                            while (!(ag>=0 && ag<=127));                          
+                            Console.Write("Ahorros: ");
+                            ah = ValidateDec();
+                            Console.Write("Contraseña: ");
+                            pass = ValidatePass();
+                            Console.Write("Género (M/F): ");
+                            gen = ValidateGen(Console.ReadKey().KeyChar);
+                            Console.Write("Estado Civil (C/S): ");
+                            EC = ValidateEC(Console.ReadKey().KeyChar);
+                            Console.Write("Estado Académico (I/M/G/P): ");
+                            EA = ValidateEA(Console.ReadKey().KeyChar);
+                            ag = Codificar(ag, EC, EA, gen);
+                            Console.WriteLine();
+                            
+
+                            do
+                            {
+                                while (z == false)
+                                {
+                                    Console.WriteLine("¿Está seguro que desea guardar estos datos?");
+                                    Console.Write("Guardar(G), Descartar(D), Salir(S): ");
+                                    x = Console.ReadLine().ToUpper();
+                                    if (x == "G" || x == "D" || x == "S")
+                                    {
+                                        z = true;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Introduzca un valor válido.");
+                                        z = false;
+                                    }
+                                }
+                                switch (x)
+                                {                                   
+                                    case "G":  
+
+                                        Person.AddCSV(Convert.ToString(ID), nam, Convert.ToString(ag), ah, pass, @path);
+                                                                                               
+                                                y = true;
+                                                z = false;
+                                                x = "";
+                                                do
+                                                {
+                                                    Console.WriteLine("¿Desea capturar otro dato? (S/N)");
+                                                    x = Console.ReadLine().ToUpper();
+                                                    if (x == "S" || x == "N")
+                                                    {
+                                                        v = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        Console.WriteLine("Introduzca un valor válido.");
+                                                    }
+                                                }
+                                                while (v==false);
+                                                switch(x)
+                                                {
+                                                    case "S":
+                                                        y = true;
+                                                        z = false;
+                                                        v = false;
+                                                        Console.WriteLine();
+                                                        break;
+
+                                                    case "N":
+                                                        w = true;
+                                                        y = true;
+                                                        z = true;
+                                                        v = false;
+                                                       break;
+                                                }                                                                      
+                                        break;
+                                    case "D":
+                                        y = true;
+                                        z = false;
+                                        v = false;
+                                        Console.WriteLine();
+                                        break;
+                                    case "S":
+                                        w = true;
+                                        y = true;
+                                        z = true;
+                                        v = false;
+                                        break;
+                                }
+
+                            }
+                            while (y == false);
+                        }
+                        while (w==false);
+                        Console.WriteLine();
+                        break;
+
+
+                    case "2":
+                        Person.ListCSV(@path);
+                        Console.ReadKey();
+                        break;
+
+
+                    case "3":
+                        Console.WriteLine("Introduzca la cédula");
+                        string param = Console.ReadLine();
+                        Person P = sorted.GetPerson(int.Parse(param));
+                        Console.WriteLine(P.toString(P));
+                        Console.WriteLine();
+                        Console.ReadKey();
+                        break;
+
+
+                    case "4":
+                        Console.WriteLine("Introduzca la cédula");
+                        bool t = false;
+                        z = false;
+                        x = "a";
+                        string temp = "temp.txt";
+                        param = Console.ReadLine();
+                        if (File.Exists(@path))
+                        {
+                            if (Person.validar(param, path) == false)
+                            {
+                                Person[] data = Person.load(path);
+                                foreach (Person p in data)
+                                {
+                                    if (!(p.id==int.Parse(param)))
+
+                                    {
+                                        Person.AddCSVFromLine(p, @temp);
+                                    }
+
+                                    else
+
+
+
+                                    {
+                                        do
+                                        {
+                                            string[] term = Person.GetTerms(p);
+                                            Console.WriteLine("Cédula actual: " + term[0]);
+                                            Console.Write("Nueva cédula: ");
+                                            int vID = ValidateInt();
+                                            Console.WriteLine("Nombre actual: " + term[1]);
+                                            Console.Write("Nuevo nombre: ");
+                                            string vNam = Console.ReadLine();
+                                            Console.WriteLine("Edad actual: " + Person.DeAg(Convert.ToInt32(term[2])));
+                                            Console.Write("Nueva edad: ");
+                                            int vAge = ValidateInt();
+                                            Console.WriteLine("Ahorros actuales: " + term[3]);
+                                            Console.Write("Nuevo ahorro: ");
+                                            string vAh = ValidateDec();
+                                            Console.Write("Contraseña actual: ");
+                                            WritePass(Convert.ToString(term[4]));
+                                            Console.WriteLine();
+                                            string vPass = ValidatePass();
+                                            Console.WriteLine("Género actual (M/F): " + Person.DeGen(Convert.ToInt32(term[2])));
+                                            Console.Write("Nuevo género: ");
+                                            gen = ValidateGen(Console.ReadKey().KeyChar);
+                                            Console.WriteLine("Estado Civil actual (C/S): " + Person.DeEC(Convert.ToInt32(term[2])));
+                                            Console.Write("Nuevo Estado Civil (C/S): ");
+                                            EC = ValidateEC(Console.ReadKey().KeyChar);
+                                            Console.WriteLine("Estado Académico actual (I/M/G/P): " + Person.DeEA(Convert.ToInt32(term[2])));
+                                            Console.Write("Nuevo Estado Académico (I/M/G/P): ");
+                                            EA = ValidateEA(Console.ReadKey().KeyChar);
+                                            vAge = Codificar(vAge, EC, EA, gen);
+                                            Console.WriteLine();
+
+                                            while (z == false)
+                                            {
+                                                Console.WriteLine("¿Está seguro que desea guardar estos datos?");
+                                                Console.Write("Guardar(G), Descartar(D), Salir(S): ");
+                                                x = Console.ReadLine().ToUpper();
+                                                if (x == "G" || x == "D" || x == "S")
+                                                {
+                                                    z = true;
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("Introduzca un valor válido.");
+                                                    z = false;
+                                                }
+                                            }
+                                            switch (x)
+                                            {
+                                                case "G":
+                                                    Person.AddCSV(Convert.ToString(vID), vNam, Convert.ToString(vAge), vAh, vPass, @temp);
+                                                    Console.WriteLine();
+                                                    t = true;
+                                                    z = false;
+                                                    break;
+
+
+                                                case "D":
+
+                                                    z = false;
+                                                    Console.WriteLine();
+                                                    break;
+                                                case "S":
+                                                    t = true;
+                                                    z = true;
+                                                    break;
+                                            }
+                                        }
+                                        while (t == false);
+
+                                    }
+                                }
+                                File.Delete(@path);
+                                System.IO.File.Move(temp, path);
+                                Console.WriteLine("Guardado satisfactoriamente");
+                                Console.ReadKey();
+                            }
+                            else
+                            {
+                                Console.WriteLine("Cédula no existente");
+                                Console.ReadKey();
+                            }
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine("Archivo no existe");
+                            Console.ReadKey();
+                        }
+                        Console.WriteLine();
+                        break;
+
+
+                    case "5":
+                        Console.WriteLine("Introduzca la cédula");
+                        bool eliminar = false;
+                        v = false;
+                        temp = "temp.txt";
+                        param = Console.ReadLine();
+                        do
+                        {
+                            Console.WriteLine("¿Desea eliminar el registro? (S/N)");
+                            x = Console.ReadLine().ToUpper();
+                            if (x == "S" || x == "N")
+                            {
+                                v = true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Introduzca un valor válido.");
+                            }
+                        }
+                        while (v == false);
+                        switch (x)
+                        {
+                            case "S":
+                                eliminar = true;
+                                break;
+
+                            case "N":
+                                eliminar = false;
+                                break;
+                        }
+                        if (eliminar==true)
+                        {
+                            Person.DeleteCSV(path, param, temp);
+                        }
+
+                        break;
+                    case "6":
+                        Environment.Exit(0);
+                        break;
+                }
+
+            }
+            while (bo==false);
+
+        }
+
+  
+     
+        public static int ValidateInt()
+        {
+            bool r= true;
+            string k = "";
+            do
+            {
+                ConsoleKeyInfo key;
+                
+                int i;
+                do
+                {
+                    key = Console.ReadKey(true);
+                    if (key.Key != ConsoleKey.Backspace)
+                    {
+                        bool x = int.TryParse(key.KeyChar.ToString(), out i);
+                        if (x)
+                        {
+
+                            k += key.KeyChar;
+                            Console.Write(key.KeyChar);
+                        }
+                    }
+                    else
+                    {
+                        if (key.Key == ConsoleKey.Backspace && k.Length > 0)
+                        {
+                            k = k.Substring(0, (k.Length - 1));
+                            Console.Write("\b \b");
+                        }
+                    }
+                }
+                while (key.Key != ConsoleKey.Enter);
+                if(k=="")
+                {
+                    Console.WriteLine("Ingrese un valor valido");
+                }
+                else
+                {
+                    r = false;
+                }
+             }
+             while (r == true);
+            Console.WriteLine();
+            return Convert.ToInt32(k);
+           
+
+            
+        }
+        public static string ValidateDec()
+        {
+            ConsoleKeyInfo key;
+            string k = "";
+            decimal i;
+            bool r = true;
+            do
+            {
+                do
+                {
+                    key = Console.ReadKey(true);
+                    if (key.Key != ConsoleKey.Backspace)
+                    {
+                        bool x = decimal.TryParse(key.KeyChar.ToString(), out i);
+                        if (x)
+                        {
+                            k += key.KeyChar;
+                            Console.Write(key.KeyChar);
+                        }
+                    }
+                    else
+                    {
+                        if (key.Key == ConsoleKey.Backspace && k.Length > 0)
+                        {
+                            k = k.Substring(0, (k.Length - 1));
+                            Console.Write("\b \b");
+                        }
+                    }
+                }
+                while (key.Key != ConsoleKey.Enter);
+                if (k == "")
+                {
+                    Console.WriteLine("Ingrese un valor valido");
+                }
+                else
+                {
+                    r = false;
+                }
+            }
+            while (r == true);
+            Console.WriteLine();
+            return k;
+
+
+        }
+
+        public static string ValidatePass()
+        {
+            bool x = true;
+            bool y = true;
+            string pass;
+            string cpass;
+            do
+            {
+                ConsoleKeyInfo key;
+                do
+                {
+                    y = true;
+                    pass = "";
+                    cpass = "";
+
+                    do
+                    {
+                        key = Console.ReadKey(true);
+                        if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
+                        {
+                            pass += key.KeyChar;
+                            Console.Write("*");
+                        }
+                        else
+                        {
+                            if (key.Key == ConsoleKey.Backspace && pass.Length > 0)
+                            {
+                                pass = pass.Substring(0, (pass.Length - 1));
+                                Console.Write("\b \b");
+                            }
+                        }
+                    }
+                    while (key.Key != ConsoleKey.Enter);
+                    Console.WriteLine();
+                    Console.WriteLine("Confirme su contraseña");
+                    do
+                    {
+                        key = Console.ReadKey(true);
+                        if (key.Key != ConsoleKey.Backspace && key.Key!=ConsoleKey.Enter)
+                        {
+                            cpass += key.KeyChar;
+                            Console.Write("*");
+                        }
+                        else
+                        {
+                            if (key.Key == ConsoleKey.Backspace && cpass.Length > 0)
+                            {
+                                cpass = cpass.Substring(0, (cpass.Length - 1));
+                                Console.Write("\b \b");
+                            }
+                        }
+                    }
+                    while (key.Key != ConsoleKey.Enter);
+                    if (pass == cpass)
+                    {
+                        x = false;
+                        y = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Asegure que sus contraseñas sean iguales");
+                        x = true;
+                        y = false;
+                    }
+                } 
+                while (y == true);
+            }
+            while (x == true);
+            Console.WriteLine();
+            return pass;
+        }
+        public static void WritePass(string i)
+        {
+            foreach(char x in i)
+            {
+                Console.Write("*");
+            }
+        }
+
+        public static bool ValidateGen(char G)
+        {
+            if(!(G=='M' || G=='F'))
+            {
+                do
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Introduzca un valor válido (Sensible a mayúsculas)");
+                    G = Console.ReadKey().KeyChar;
+                }
+                while (!(G == 'M' || G == 'F'));
+                
+            }
+            if (G == 'M')
+            {
+                Console.WriteLine();
+                return true;
+            }
+            else
+            {
+                Console.WriteLine();
+                return false;
+            }
+            
+        }
+        public static bool ValidateEC(char G)
+        {
+            if (!(G == 'C' || G == 'S'))
+            {
+                do
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Introduzca un valor válido (Sensible a mayúsculas)");
+                    G = Console.ReadKey().KeyChar;
+                }
+                while (!(G == 'C' || G == 'S'));
+
+            }
+            if (G == 'C')
+            {
+                Console.WriteLine();
+                return true;
+            }
+            else
+            {
+                Console.WriteLine();
+                return false;
+            }
+
+        }
+        public static char ValidateEA(char G)
+        {
+            if (!(G == 'I' || G == 'M'  || G=='G' || G=='P'))
+            {
+                do                
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Introduzca un valor válido (Sensible a mayúsculas)");
+                    G = Console.ReadKey().KeyChar;
+                }
+                while (!(G == 'I' || G == 'M' || G == 'G' || G == 'P'));
+
+            }
+            return G;
+                
+        }
+
+        public static int Codificar(int I, bool EC, char EA, bool gen)
+        {
+            if(gen==true)
+            {
+                I = I | 1024;
+            }
+            if(EC==true)
+            {
+                I = I | 512;
+            }
+            switch(EA)
+            {
+                case 'P': //11
+                    I = I | 384;
+                    break;
+                case 'G': //10
+                    I = I | 256;
+                    break;
+                case 'M': //01
+                    I = I | 128;
+                    break;
+                default: //00
+                    break;
+            }
+            return I;
+        }
+
+
+    }
+    }
+

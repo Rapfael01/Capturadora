@@ -1,0 +1,86 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
+using System.IO;
+
+namespace CapturaDatos
+{
+    public class ArraySet
+    {
+
+        private Person[][] buckets = new Person[20][];
+
+        public ArraySet()
+        {
+            for(int i=0;i<buckets.Length;i++)
+            {
+                buckets[i] = new Person[5];
+            }
+        }
+
+        public void Add(Person line)
+        {
+            if(Contains(line))
+            {
+                Console.Error.WriteLine("Cédula ya existe.");
+                return;
+            }
+            bool bucketFilled = false;
+            Person[] bucket = buckets[Math.Abs(line.id % 3)];
+            for(int i=0;i<bucket.Length;i++)
+            {
+                if (bucket[i] == null)
+                {
+                    bucket[i] = line;
+                    bucketFilled = true;
+                    break;
+                }
+            }
+            if(!bucketFilled)
+            {
+                ExtendBucket(Math.Abs(line.id % 3));
+                buckets[Math.Abs(line.id % 3)][bucket.Length] = line;
+            }
+        }
+
+        private bool Contains(Person line)
+        {
+            Person[] bucket = buckets[Math.Abs(line.id % 3)];
+            foreach(Person p in bucket)
+            {
+                if(line.Equals(p))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void ExtendBucket(int y)
+        {
+            int newLength = (int)(buckets[y].Length * 1.5);
+            Person[] newBucket = new Person[newLength];
+            for(int i=0;i< buckets[y].Length;i++)
+            {
+                newBucket[i] = buckets[y][i];
+            }
+        }
+
+        public Person GetPerson(int param)
+        {
+            Person[] bucket = buckets[Math.Abs(param%3)];
+            foreach(Person p in bucket)
+            {
+                if(p.id.Equals(param))
+                {
+                    return p;
+                }
+            }
+            Console.Error.WriteLine("Persona inexistente.");
+            return null;
+        }
+
+
+    }
+}
